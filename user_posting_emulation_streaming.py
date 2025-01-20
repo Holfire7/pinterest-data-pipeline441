@@ -37,9 +37,9 @@ class AWSDBConnector:
 new_connector = AWSDBConnector()
 engine = new_connector.create_db_connector()
 
-invoke_url_pin = "https://51qgghrell.execute-api.us-east-1.amazonaws.com/my-prod/topics/0eaf46a0829f.pin"
-invoke_url_geo = "https://51qgghrell.execute-api.us-east-1.amazonaws.com/my-prod/topics/0eaf46a0829f.geo"
-invoke_url_user = "https://51qgghrell.execute-api.us-east-1.amazonaws.com/my-prod/topics/0eaf46a0829f.user"
+invoke_url_pin = "https://51qgghrell.execute-api.us-east-1.amazonaws.com/my-prod/my-stream/Kinesis-Prod-Stream/record"
+invoke_url_geo = "https://51qgghrell.execute-api.us-east-1.amazonaws.com/my-prod/my-stream/Kinesis-Prod-Stream/record"
+invoke_url_user = "https://51qgghrell.execute-api.us-east-1.amazonaws.com/my-prod/my-stream/Kinesis-Prod-Stream/record"
 
 
 def run_infinite_post_data_loop():
@@ -72,49 +72,51 @@ def run_infinite_post_data_loop():
             print("geo_result:", geo_result)
             print("user_result:", user_result)
 
-            headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
-            pin_response = requests.post(
+            headers = {'Content-Type': 'application/json'}
+            pin_response = requests.request(
+                "PUT",
                 invoke_url_pin,
                 headers=headers,
                 data=json.dumps({
-                    "records": [
-                        {
-                        "value": pin_result
-                        }
-                    ]
-                }, default=converter)
+                    "StreamName": "Kinesis-Prod-Stream",
+                    "Record": pin_result,
+                    "PartitionKey": "pin-partition"
+                },  default=converter)
+                
+
             )
             print("Pinterest Response Status:", pin_response.status_code)
             print("Pinterest Response Body:", pin_response.text) 
 
 
-            headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
-            geo_response = requests.post(
+            headers = {'Content-Type': 'application/json'}
+            geo_response = requests.request(
+                "PUT",
                 invoke_url_geo,
                 headers=headers,
                 data=json.dumps({
-                    "records": [
-                        {
-                        "value": geo_result
-                        }
-                    ]
-                }, default=converter)
+                    "StreamName": "Kinesis-Prod-Stream",
+                    "Record": geo_result,
+                    "PartitionKey": "geo-partition"
+                },  default=converter)
+
             )
             print("Geolocation Response Status:", geo_response.status_code)
             print("Geolocation Response Body:", geo_response.text)
 
 
-            headers = {'Content-Type': 'application/vnd.kafka.json.v2+json'}
-            user_response = requests.post(
+            
+            headers = {'Content-Type': 'application/json'}
+            user_response = requests.request(
+                "PUT",
                 invoke_url_user,
                 headers=headers,
                 data=json.dumps({
-                    "records": [
-                        {
-                        "value": user_result
-                        }
-                    ]
-                }, default=converter)
+                    "StreamName": "Kinesis-Prod-Stream",
+                    "Record": user_result,
+                    "PartitionKey": "user-partition"
+                },  default=converter)
+
             )
             print("User Response Status:", user_response.status_code)
             print("User Response Body:", user_response.text)
