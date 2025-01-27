@@ -13,6 +13,8 @@ random.seed(100)
 def converter(o):
     if isinstance(o, datetime):
         return o.isoformat()
+    if isinstance(o, bytes):
+        return o.decode("utf-8")
     raise TypeError(f"object of type is not JSON serializable")
 
 class AWSDBConnector:
@@ -37,9 +39,9 @@ class AWSDBConnector:
 new_connector = AWSDBConnector()
 engine = new_connector.create_db_connector()
 
-invoke_url_pin = "https://51qgghrell.execute-api.us-east-1.amazonaws.com/my-prod/my-stream/Kinesis-Prod-Stream/record"
-invoke_url_geo = "https://51qgghrell.execute-api.us-east-1.amazonaws.com/my-prod/my-stream/Kinesis-Prod-Stream/record"
-invoke_url_user = "https://51qgghrell.execute-api.us-east-1.amazonaws.com/my-prod/my-stream/Kinesis-Prod-Stream/record"
+invoke_url_pin = "https://51qgghrell.execute-api.us-east-1.amazonaws.com/my-prod/streams/Kinesis-Prod-Stream/record"
+invoke_url_geo = "https://51qgghrell.execute-api.us-east-1.amazonaws.com/my-prod/streams/Kinesis-Prod-Stream/record"
+invoke_url_user = "https://51qgghrell.execute-api.us-east-1.amazonaws.com/my-prod/streams/Kinesis-Prod-Stream/record"
 
 
 def run_infinite_post_data_loop():
@@ -73,30 +75,34 @@ def run_infinite_post_data_loop():
             print("user_result:", user_result)
 
             headers = {'Content-Type': 'application/json'}
+
+            print("Payload to Kinesis:", json.dumps(pin_result, default=converter))
+
             pin_response = requests.request(
                 "PUT",
                 invoke_url_pin,
                 headers=headers,
                 data=json.dumps({
                     "StreamName": "Kinesis-Prod-Stream",
-                    "Record": pin_result,
-                    "PartitionKey": "pin-partition"
-                },  default=converter)
-                
-
-            )
+                    "Data": pin_result,
+                    "PartitionKey": "pin-partition",
+                 }, default=converter)
+                )
             print("Pinterest Response Status:", pin_response.status_code)
             print("Pinterest Response Body:", pin_response.text) 
 
 
             headers = {'Content-Type': 'application/json'}
+
+            print("Payload to Kinesis:", json.dumps(geo_result, default=converter))
+
             geo_response = requests.request(
                 "PUT",
                 invoke_url_geo,
                 headers=headers,
                 data=json.dumps({
                     "StreamName": "Kinesis-Prod-Stream",
-                    "Record": geo_result,
+                    "Data": geo_result,
                     "PartitionKey": "geo-partition"
                 },  default=converter)
 
@@ -107,13 +113,16 @@ def run_infinite_post_data_loop():
 
             
             headers = {'Content-Type': 'application/json'}
+
+            print("Payload to Kinesis:", json.dumps(user_result, default=converter))
+
             user_response = requests.request(
                 "PUT",
                 invoke_url_user,
                 headers=headers,
                 data=json.dumps({
                     "StreamName": "Kinesis-Prod-Stream",
-                    "Record": user_result,
+                    "Data": user_result,
                     "PartitionKey": "user-partition"
                 },  default=converter)
 
