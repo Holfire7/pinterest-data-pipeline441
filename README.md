@@ -61,10 +61,10 @@ project-root/
 |├── AWS Kinesis work.ipynb
 |├── config.ini
 |├── db_creds.yaml
+|├── LICENSE.txt
 |├── Pinterest_data_project.ipynb
 |├── README.md
+|├── requirements.txt
 |├── user_posting_emulation.py
-|├── user_posting_emulation_streaming.py
-|├── LICENSE.txt
 ```
 
